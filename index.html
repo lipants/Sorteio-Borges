@@ -147,13 +147,6 @@
             text-align: center;
         }
 
-        .info {
-            text-align: center;
-            margin-top: 15px;
-            color: #666;
-            font-size: 13px;
-        }
-
         .reset-btn {
             margin-top: 15px;
             background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
@@ -183,7 +176,7 @@
             </select>
         </div>
 
-        <button onclick="sortearAmigo()" id="sortearBtn">🎲 Sortear Meu Amigo Secreto</button>
+        <button onclick="sortearAmigo()" id="sortearBtn">🎲 Revelar Meu Amigo Secreto</button>
 
         <div class="result" id="result">
             <h2>🎉 Seu amigo secreto é:</h2>
@@ -194,9 +187,7 @@
             </div>
         </div>
 
-        <div class="info" id="info"></div>
-
-        <!-- Botão secreto para resetar (só para testes) -->
+        <!-- Botão secreto para resetar (só para admin) -->
         <button onclick="resetarSorteio()" class="reset-btn" style="display:none;" id="resetBtn">
             🔄 Resetar Sorteio (Admin)
         </button>
@@ -216,11 +207,6 @@
             localStorage.setItem('jaForamSorteados', JSON.stringify([]));
         }
 
-        // Verificar status ao carregar
-        window.onload = function() {
-            atualizarInfo();
-        };
-
         function sortearAmigo() {
             const select = document.getElementById('participante');
             const participante = select.value;
@@ -234,10 +220,9 @@
             const sorteios = JSON.parse(localStorage.getItem('amigoSecreto'));
             
             if (sorteios[participante]) {
-                // Mostrar o resultado já sorteado
+                // Mostrar o resultado já sorteado (sem avisar que já tinha sorteado)
                 document.getElementById('amigo').textContent = sorteios[participante];
                 document.getElementById('result').style.display = 'block';
-                alert('ℹ️ Você já realizou seu sorteio! Seu amigo secreto está sendo exibido novamente.');
                 return;
             }
 
@@ -250,7 +235,7 @@
             });
 
             if (disponiveis.length === 0) {
-                alert('⚠️ Não há mais pessoas disponíveis para sortear!');
+                alert('⚠️ Não há mais pessoas disponíveis para sortear! Entre em contato com o organizador.');
                 return;
             }
 
@@ -268,20 +253,6 @@
             // Mostrar resultado
             document.getElementById('amigo').textContent = sorteado;
             document.getElementById('result').style.display = 'block';
-            
-            atualizarInfo();
-        }
-
-        function atualizarInfo() {
-            const sorteios = JSON.parse(localStorage.getItem('amigoSecreto'));
-            const total = Object.keys(sorteios).length;
-            const infoDiv = document.getElementById('info');
-            
-            infoDiv.textContent = `${total} de 9 pessoas já sortearam`;
-            
-            if (total === 9) {
-                infoDiv.innerHTML = '✅ <strong>Todos já sortearam!</strong>';
-            }
         }
 
         function resetarSorteio() {
@@ -289,8 +260,8 @@
                 localStorage.setItem('amigoSecreto', JSON.stringify({}));
                 localStorage.setItem('jaForamSorteados', JSON.stringify([]));
                 document.getElementById('result').style.display = 'none';
-                atualizarInfo();
                 alert('✅ Sorteio resetado com sucesso!');
+                location.reload();
             }
         }
 
