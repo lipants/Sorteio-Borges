@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amigo Secreto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h2 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .friend {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 10px;
+            word-break: break-word;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .reset-btn {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            font-size: 14px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎁 Amigo Secreto</h1>
+        <div class="subtitle">Descubra quem você vai presentear!</div>
+        
+        <div class="input-section">
+            <label for="participante">Selecione seu nome:</label>
+            <select id="participante">
+                <option value="">-- Escolha seu nome --</option>
+                <option value="Larissa">Larissa</option>
+                <option value="Adriana">Adriana</option>
+                <option value="Beatriz">Beatriz</option>
+                <option value="Guilherme">Guilherme</option>
+                <option value="Julia">Julia</option>
+                <option value="Daniela">Daniela</option>
+                <option value="Rodrigo">Rodrigo</option>
+                <option value="Leda">Leda</option>
+                <option value="Felipe">Felipe</option>
+            </select>
+        </div>
+
+        <button onclick="sortearAmigo()" id="sortearBtn">🎲 Revelar Meu Amigo Secreto</button>
+
+        <div class="result" id="result">
+            <h2>🎉 Seu amigo secreto é:</h2>
+            <div class="friend" id="amigo"></div>
+            <div class="warning">
+                ⚠️ Guarde esse nome em segredo!<br>
+                Não compartilhe com ninguém.
+            </div>
+        </div>
+
+        <!-- Botão secreto para resetar (só para admin) -->
+        <button onclick="resetarSorteio()" class="reset-btn" style="display:none;" id="resetBtn">
+            🔄 Resetar Sorteio (Admin)
+        </button>
+    </div>
+
+    <script>
+        // Lista de participantes
+        const participantes = ['Larissa', 'Adriana', 'Beatriz', 'Guilherme', 'Julia', 'Daniela', 'Rodrigo', 'Leda', 'Felipe'];
+
+        // Inicializar sorteios se não existir
+        if (!localStorage.getItem('amigoSecreto')) {
+            localStorage.setItem('amigoSecreto', JSON.stringify({}));
+        }
+
+        // Inicializar lista de pessoas já sorteadas
+        if (!localStorage.getItem('jaForamSorteados')) {
+            localStorage.setItem('jaForamSorteados', JSON.stringify([]));
+        }
+
+        function sortearAmigo() {
+            const select = document.getElementById('participante');
+            const participante = select.value;
+            
+            if (!participante) {
+                alert('⚠️ Por favor, selecione seu nome!');
+                return;
+            }
+
+            // Verificar se já sorteou
+            const sorteios = JSON.parse(localStorage.getItem('amigoSecreto'));
+            
+            if (sorteios[participante]) {
+                // Mostrar o resultado já sorteado (sem avisar que já tinha sorteado)
+                document.getElementById('amigo').textContent = sorteios[participante];
+                document.getElementById('result').style.display = 'block';
+                return;
+            }
+
+            // Pegar lista de pessoas que JÁ FORAM SORTEADAS (por qualquer pessoa)
+            const jaForamSorteados = JSON.parse(localStorage.getItem('jaForamSorteados'));
+            
+            // Pessoas disponíveis = todas MENOS (a própria pessoa + as já sorteadas)
+            const disponiveis = participantes.filter(p => {
+                return p !== participante && !jaForamSorteados.includes(p);
+            });
+
+            if (disponiveis.length === 0) {
+                alert('⚠️ Não há mais pessoas disponíveis para sortear! Entre em contato com o organizador.');
+                return;
+            }
+
+            // Sortear aleatoriamente
+            const sorteado = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+            
+            // Salvar sorteio
+            sorteios[participante] = sorteado;
+            localStorage.setItem('amigoSecreto', JSON.stringify(sorteios));
+
+            // Adicionar pessoa sorteada à lista de "já foram sorteados"
+            jaForamSorteados.push(sorteado);
+            localStorage.setItem('jaForamSorteados', JSON.stringify(jaForamSorteados));
+
+            // Mostrar resultado
+            document.getElementById('amigo').textContent = sorteado;
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function resetarSorteio() {
+            if (confirm('Tem certeza que deseja resetar todos os sorteios?')) {
+                localStorage.setItem('amigoSecreto', JSON.stringify({}));
+                localStorage.setItem('jaForamSorteados', JSON.stringify([]));
+                document.getElementById('result').style.display = 'none';
+                alert('✅ Sorteio resetado com sucesso!');
+                location.reload();
+            }
+        }
+
+        // Atalho secreto: pressione Ctrl+Shift+R para mostrar botão de reset
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                document.getElementById('resetBtn').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
