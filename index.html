@@ -204,21 +204,16 @@
 
     <script>
         // Lista de participantes
-        const participantes = {
-            'Larissa': 'Larissa',
-            'Adriana': 'Adriana',
-            'Beatriz': 'Beatriz',
-            'Guilherme': 'Guilherme',
-            'Julia': 'Julia',
-            'Daniela': 'Daniela',
-            'Rodrigo': 'Rodrigo',
-            'Leda': 'Leda',
-            'Felipe': 'Felipe'
-        };
+        const participantes = ['Larissa', 'Adriana', 'Beatriz', 'Guilherme', 'Julia', 'Daniela', 'Rodrigo', 'Leda', 'Felipe'];
 
         // Inicializar sorteios se não existir
         if (!localStorage.getItem('amigoSecreto')) {
             localStorage.setItem('amigoSecreto', JSON.stringify({}));
+        }
+
+        // Inicializar lista de pessoas já sorteadas
+        if (!localStorage.getItem('jaForamSorteados')) {
+            localStorage.setItem('jaForamSorteados', JSON.stringify([]));
         }
 
         // Verificar status ao carregar
@@ -228,9 +223,9 @@
 
         function sortearAmigo() {
             const select = document.getElementById('participante');
-            const participanteKey = select.value;
+            const participante = select.value;
             
-            if (!participanteKey) {
+            if (!participante) {
                 alert('⚠️ Por favor, selecione seu nome!');
                 return;
             }
@@ -238,15 +233,20 @@
             // Verificar se já sorteou
             const sorteios = JSON.parse(localStorage.getItem('amigoSecreto'));
             
-            if (sorteios[participanteKey]) {
-                alert('❌ Você já realizou seu sorteio!\n\nSeu amigo secreto já foi definido.');
+            if (sorteios[participante]) {
+                // Mostrar o resultado já sorteado
+                document.getElementById('amigo').textContent = sorteios[participante];
+                document.getElementById('result').style.display = 'block';
+                alert('ℹ️ Você já realizou seu sorteio! Seu amigo secreto está sendo exibido novamente.');
                 return;
             }
 
-            // Pegar lista de pessoas que ainda não foram sorteadas
-            const jaForamSorteados = Object.values(sorteios);
-            const disponiveis = Object.keys(participantes).filter(p => {
-                return p !== participanteKey && !jaForamSorteados.includes(p);
+            // Pegar lista de pessoas que JÁ FORAM SORTEADAS (por qualquer pessoa)
+            const jaForamSorteados = JSON.parse(localStorage.getItem('jaForamSorteados'));
+            
+            // Pessoas disponíveis = todas MENOS (a própria pessoa + as já sorteadas)
+            const disponiveis = participantes.filter(p => {
+                return p !== participante && !jaForamSorteados.includes(p);
             });
 
             if (disponiveis.length === 0) {
@@ -258,11 +258,15 @@
             const sorteado = disponiveis[Math.floor(Math.random() * disponiveis.length)];
             
             // Salvar sorteio
-            sorteios[participanteKey] = sorteado;
+            sorteios[participante] = sorteado;
             localStorage.setItem('amigoSecreto', JSON.stringify(sorteios));
 
+            // Adicionar pessoa sorteada à lista de "já foram sorteados"
+            jaForamSorteados.push(sorteado);
+            localStorage.setItem('jaForamSorteados', JSON.stringify(jaForamSorteados));
+
             // Mostrar resultado
-            document.getElementById('amigo').textContent = participantes[sorteado];
+            document.getElementById('amigo').textContent = sorteado;
             document.getElementById('result').style.display = 'block';
             
             atualizarInfo();
@@ -283,6 +287,7 @@
         function resetarSorteio() {
             if (confirm('Tem certeza que deseja resetar todos os sorteios?')) {
                 localStorage.setItem('amigoSecreto', JSON.stringify({}));
+                localStorage.setItem('jaForamSorteados', JSON.stringify([]));
                 document.getElementById('result').style.display = 'none';
                 atualizarInfo();
                 alert('✅ Sorteio resetado com sucesso!');
