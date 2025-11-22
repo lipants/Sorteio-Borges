@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amigo Secreto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h2 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .friend {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 10px;
+            word-break: break-word;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .info {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .reset-btn {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            font-size: 14px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎁 Amigo Secreto</h1>
+        <div class="subtitle">Descubra quem você vai presentear!</div>
+        
+        <div class="input-section">
+            <label for="participante">Selecione seu nome:</label>
+            <select id="participante">
+                <option value="">-- Escolha seu nome --</option>
+                <option value="Larissa">Larissa</option>
+                <option value="Adriana">Adriana</option>
+                <option value="Beatriz">Beatriz</option>
+                <option value="Guilherme">Guilherme</option>
+                <option value="Julia">Julia</option>
+                <option value="Daniela">Daniela</option>
+                <option value="Rodrigo">Rodrigo</option>
+                <option value="Leda">Leda</option>
+                <option value="Felipe">Felipe</option>
+            </select>
+        </div>
+
+        <button onclick="sortearAmigo()" id="sortearBtn">🎲 Sortear Meu Amigo Secreto</button>
+
+        <div class="result" id="result">
+            <h2>🎉 Seu amigo secreto é:</h2>
+            <div class="friend" id="amigo"></div>
+            <div class="warning">
+                ⚠️ Guarde esse nome em segredo!<br>
+                Não compartilhe com ninguém.
+            </div>
+        </div>
+
+        <div class="info" id="info"></div>
+
+        <!-- Botão secreto para resetar (só para testes) -->
+        <button onclick="resetarSorteio()" class="reset-btn" style="display:none;" id="resetBtn">
+            🔄 Resetar Sorteio (Admin)
+        </button>
+    </div>
+
+    <script>
+        // Lista de participantes
+        const participantes = {
+            'Larissa': 'Larissa',
+            'Adriana': 'Adriana',
+            'Beatriz': 'Beatriz',
+            'Guilherme': 'Guilherme',
+            'Julia': 'Julia',
+            'Daniela': 'Daniela',
+            'Rodrigo': 'Rodrigo',
+            'Leda': 'Leda',
+            'Felipe': 'Felipe'
+        };
+
+        // Inicializar sorteios se não existir
+        if (!localStorage.getItem('amigoSecreto')) {
+            localStorage.setItem('amigoSecreto', JSON.stringify({}));
+        }
+
+        // Verificar status ao carregar
+        window.onload = function() {
+            atualizarInfo();
+        };
+
+        function sortearAmigo() {
+            const select = document.getElementById('participante');
+            const participanteKey = select.value;
+            
+            if (!participanteKey) {
+                alert('⚠️ Por favor, selecione seu nome!');
+                return;
+            }
+
+            // Verificar se já sorteou
+            const sorteios = JSON.parse(localStorage.getItem('amigoSecreto'));
+            
+            if (sorteios[participanteKey]) {
+                alert('❌ Você já realizou seu sorteio!\n\nSeu amigo secreto já foi definido.');
+                return;
+            }
+
+            // Pegar lista de pessoas que ainda não foram sorteadas
+            const jaForamSorteados = Object.values(sorteios);
+            const disponiveis = Object.keys(participantes).filter(p => {
+                return p !== participanteKey && !jaForamSorteados.includes(p);
+            });
+
+            if (disponiveis.length === 0) {
+                alert('⚠️ Não há mais pessoas disponíveis para sortear!');
+                return;
+            }
+
+            // Sortear aleatoriamente
+            const sorteado = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+            
+            // Salvar sorteio
+            sorteios[participanteKey] = sorteado;
+            localStorage.setItem('amigoSecreto', JSON.stringify(sorteios));
+
+            // Mostrar resultado
+            document.getElementById('amigo').textContent = participantes[sorteado];
+            document.getElementById('result').style.display = 'block';
+            
+            atualizarInfo();
+        }
+
+        function atualizarInfo() {
+            const sorteios = JSON.parse(localStorage.getItem('amigoSecreto'));
+            const total = Object.keys(sorteios).length;
+            const infoDiv = document.getElementById('info');
+            
+            infoDiv.textContent = `${total} de 9 pessoas já sortearam`;
+            
+            if (total === 9) {
+                infoDiv.innerHTML = '✅ <strong>Todos já sortearam!</strong>';
+            }
+        }
+
+        function resetarSorteio() {
+            if (confirm('Tem certeza que deseja resetar todos os sorteios?')) {
+                localStorage.setItem('amigoSecreto', JSON.stringify({}));
+                document.getElementById('result').style.display = 'none';
+                atualizarInfo();
+                alert('✅ Sorteio resetado com sucesso!');
+            }
+        }
+
+        // Atalho secreto: pressione Ctrl+Shift+R para mostrar botão de reset
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                document.getElementById('resetBtn').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
